@@ -1,5 +1,7 @@
 # dp4a-unit
 
+[![tests](https://github.com/Jusman0/dp4a-unit/actions/workflows/test.yml/badge.svg)](https://github.com/Jusman0/dp4a-unit/actions/workflows/test.yml)
+
 A Verilog implementation of **DP4A**: four int8 multiplies summed into a 32-bit accumulator in a single operation. NVIDIA added DP4A to Pascal GPUs (compute capability 6.1) to speed up int8 inference. This version is verified bit-exact against a Python golden model and used to compute layer 1 of my [TinyML MNIST network](https://github.com/Jusman0/tinyml-mnist-uno).
 
 ```
@@ -40,18 +42,25 @@ Almost all the work in a quantized neural network is int8 dot products. One neur
 - **Random vectors** fill the rest of the 10,000.
 - **Real data:** the TinyML layer-1 weights and test images, checked against NumPy's int32 matrix multiply.
 
+The first clocks of the pipelined unit, drawn from the simulation (`python3 tools/plot_wave.py`). The first vector is 0x80 × 0x80 in all four lanes, read as unsigned: 4 × 128 × 128 = 65,536 = `00010000`.
+
+<img src="docs/waveform.png" alt="Simulation waveform of dp4a_pipe showing a 2-clock latency">
+
+Every push runs both testbenches on GitHub's servers ([Actions](https://github.com/Jusman0/dp4a-unit/actions)). The badge at the top only shows "passing" if both print PASS.
+
 To check the checks, I planted two bugs. Treating operand `a` as always unsigned dropped the vector test to 5,456 / 10,000. Narrowing the adder tree to 16 bits dropped it to 7,077 / 10,000. The TinyML test alone missed both, because image pixels are never negative and real sums stay small. That's why it takes directed and random vectors, not just real data.
 
 ## Run it
 
-Needs [Icarus Verilog](https://steveicarus.github.io/iverilog/) (`brew install icarus-verilog`). GTKWave shows the waveforms. Yosys and nextpnr-ice40 (both in the [OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build)) are only needed for synthesis.
+Needs [Icarus Verilog](https://steveicarus.github.io/iverilog/) (`brew install icarus-verilog`). To look at waveforms, open `sim/dp4a.vcd` in GTKWave or in the browser-based [Surfer](https://app.surfer-project.org/). Yosys and nextpnr-ice40 (both in the [OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build)) are only needed for synthesis.
 
 ```bash
-make test               # both testbenches, prints PASS / FAIL
+make test               # both testbenches; ends with ALL TESTS PASSED
 make wave               # dp4a testbench + waveform in GTKWave
 make synth              # gate counts: generic and iCE40
 bash synth/timing.sh    # place and route, max clock frequency
 python3 model/golden.py # regenerate tests/*.hex
+python3 tools/plot_wave.py  # redraw docs/waveform.png from the last simulation
 ```
 
 ## Layout
@@ -66,6 +75,8 @@ tb/tb_tinyml_neuron.v   TinyML layer 1 through dot_engine
 model/golden.py         Python golden model and vector generator
 model/tinyml_layer1.npz layer-1 weights and test images from tinyml-mnist-uno
 synth/                  Yosys scripts, timing wrappers, place-and-route script
+tools/plot_wave.py      draws docs/waveform.png from the simulation
+.github/workflows/      runs the testbenches on every push
 ```
 
 ## Series
