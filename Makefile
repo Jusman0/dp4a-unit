@@ -9,8 +9,10 @@ RTL = rtl/int8_mul.v rtl/dp4a.v rtl/dp4a_pipe.v rtl/dot_engine.v
 .PHONY: test vectors wave synth clean
 
 test: sim/tb_dp4a sim/tb_tinyml_neuron
-	vvp -n sim/tb_dp4a
-	vvp -n sim/tb_tinyml_neuron
+	vvp -n sim/tb_dp4a | tee sim/tb_dp4a.log
+	vvp -n sim/tb_tinyml_neuron | tee sim/tb_tinyml_neuron.log
+	@grep -q '^PASS' sim/tb_dp4a.log && grep -q '^PASS' sim/tb_tinyml_neuron.log \
+		&& echo "ALL TESTS PASSED"
 
 sim/%: tb/%.v $(RTL) | sim
 	$(IVERILOG) -o $@ $(RTL) $<
