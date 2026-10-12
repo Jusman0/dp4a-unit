@@ -103,4 +103,4 @@ Each project builds the same neural-network operation one level closer to a GPU:
 1. [analog-neuron](https://github.com/Jusman0/analog-neuron): a weighted sum computed by resistors
 2. [tinyml-mnist-uno](https://github.com/Jusman0/tinyml-mnist-uno): the network in int8 on an 8-bit CPU, one MAC at a time
 3. **dp4a-unit**: the int8 dot product as dedicated hardware, four MACs per clock
-4. tiny-tensor-core (next): 32 MACs in parallel running the whole network
+4. [tiny-tensor-core](https://github.com/Jusman0/tiny-tensor-core): the whole network in hardware, 32 MACs per clock, bit-exact on all 10,000 MNIST test images
