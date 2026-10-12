@@ -63,6 +63,23 @@ python3 model/golden.py # regenerate tests/*.hex
 python3 tools/plot_wave.py  # redraw docs/waveform.png from the last simulation
 ```
 
+A passing `make test` run (macOS, Icarus Verilog 12):
+
+```
+dp4a       (combinational): 10000/10000 match
+dp4a_pipe  (2-stage)      : 10000/10000 match, 10000 results out
+PASS
+image 0, neuron 0: acc = 23470 (expected 23470)
+image 0: 32/32 neurons match
+image 1: 32/32 neurons match
+image 2: 32/32 neurons match
+image 3: 32/32 neurons match
+image 4: 32/32 neurons match
+7840 dp4a beats for 160 neurons (49 per neuron)
+PASS
+ALL TESTS PASSED
+```
+
 ## Layout
 
 ```
