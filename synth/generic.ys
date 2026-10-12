@@ -1,0 +1,4 @@
+# Generic gate-level synthesis of the pipelined dp4a
+read_verilog rtl/int8_mul.v rtl/dp4a_pipe.v
+synth -top dp4a_pipe -flatten
+tee -o synth/generic_stat.txt stat

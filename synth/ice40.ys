@@ -1,0 +1,4 @@
+# Map the pipelined dp4a onto a Lattice iCE40 FPGA (LUT4s, flip-flops, carry chains)
+read_verilog rtl/int8_mul.v rtl/dp4a_pipe.v
+synth_ice40 -top dp4a_pipe
+tee -o synth/ice40_stat.txt stat

@@ -1,0 +1,18 @@
+
+4. Printing statistics.
+
+=== dp4a_pipe ===
+
+   Number of wires:                458
+   Number of wire bits:           2074
+   Number of public wires:         458
+   Number of public wire bits:    2074
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:               1274
+     SB_CARRY                       93
+     SB_DFF                        136
+     SB_DFFSR                        2
+     SB_LUT4                      1043
+
