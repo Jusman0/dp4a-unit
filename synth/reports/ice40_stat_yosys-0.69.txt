@@ -1,0 +1,20 @@
+
+4. Printing statistics.
+
+=== dp4a_pipe ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      701 wires
+     2181 wire bits
+      701 public wires
+     2181 public wire bits
+       10 ports
+      134 port bits
+     1248 cells
+        4   $scopeinfo
+       93   SB_CARRY
+      136   SB_DFF
+        2   SB_DFFSR
+     1013   SB_LUT4
+

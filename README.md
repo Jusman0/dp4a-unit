@@ -12,9 +12,9 @@ d = c + a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]      a, b: four int8 packe
 |---|---|
 | 10,000 random and edge-case vectors, all four signed/unsigned modes | **10,000 / 10,000 bit-exact**, combinational and pipelined |
 | TinyML layer 1: 5 test images × 32 neurons × 196 inputs | **160 / 160** int32 accumulators match NumPy and the Arduino |
-| Max clock on an iCE40 HX8K FPGA, single stage | 51.6 MHz (median of 3 placement seeds) |
-| Max clock, two-stage pipeline | **88.5 MHz**, 1.7× faster for one extra clock of latency |
-| iCE40 resources, two-stage | 1,043 LUT4s, 138 flip-flops, 93 carry cells |
+| Max clock on an iCE40 HX8K FPGA, combinational `dp4a` between registers | ~51.6 MHz (median of 3 placement seeds; unlogged estimate, see [`synth/reports/`](synth/reports/)) |
+| Max clock, `dp4a_pipe` (two-stage) on its own | ~88.5 MHz (unlogged estimate), 1.7× faster for one extra clock of latency. `dot_engine` uses the combinational `dp4a`, so this doesn't apply to it |
+| iCE40 resources, `dp4a_pipe` | 1,043 LUT4s, 138 flip-flops, 93 carry cells (LUT count from an older Yosys; Yosys 0.69 gives 1,013 LUT4s) |
 
 ## Why DP4A
 
@@ -31,8 +31,8 @@ Almost all the work in a quantized neural network is int8 dot products. One neur
 
 - **`int8_mul`: one multiplier for every sign mode.** Each byte is widened to 9-bit signed first. An int8 copies its sign bit, and a uint8 gets a 0 on top. After that, a single signed 9×9 multiplier handles int8×int8, int8×uint8 and uint8×uint8, so `a_signed` / `b_signed` work like PTX `dp4a.{s32,u32}.{s32,u32}`.
 - **Bit widths.** Products are 18 bits (worst case 255 × 255 = 65,025), and the four-way sum is 20 bits (worst case 260,100). The sum is sign-extended to 32 bits and added to `c` modulo 2^32, the same way a 32-bit register wraps.
-- **`dp4a_pipe`: two stages.** In one cycle, a signal has to pass through a multiplier, an adder tree and a 32-bit adder. Putting registers after the multipliers splits that path roughly in half. Place-and-route on an iCE40 shows the payoff: the clock rises from 51.6 to 88.5 MHz, at the cost of one extra cycle of latency. Throughput stays at one DP4A per clock.
-- **`dot_engine`: streaming dot product.** One DP4A feeding back into an accumulator. A `first` flag starts a new dot product from 0 on its first beat, so there's no wasted clear cycle between neurons.
+- **`dp4a_pipe`: two stages.** In one cycle, a signal has to pass through a multiplier, an adder tree and a 32-bit adder. Putting registers after the multipliers splits that path roughly in half. In my place-and-route runs on an iCE40, the clock rose from about 51.6 to 88.5 MHz, at the cost of one extra cycle of latency (the nextpnr logs weren't kept, so treat both numbers as estimates). Throughput stays at one DP4A per clock.
+- **`dot_engine`: streaming dot product.** One DP4A feeding back into an accumulator. A `first` flag starts a new dot product from 0 on its first beat, so there's no wasted clear cycle between neurons. It's built on the combinational `dp4a`, so the 88.5 MHz figure is for `dp4a_pipe` alone, not for `dot_engine`.
 
 ## Verification
 
@@ -92,6 +92,7 @@ tb/tb_tinyml_neuron.v   TinyML layer 1 through dot_engine
 model/golden.py         Python golden model and vector generator
 model/tinyml_layer1.npz layer-1 weights and test images from tinyml-mnist-uno
 synth/                  Yosys scripts, timing wrappers, place-and-route script
+synth/reports/          Yosys 0.69 re-run and tool versions
 tools/plot_wave.py      draws docs/waveform.png from the simulation
 .github/workflows/      runs the testbenches on every push
 ```
