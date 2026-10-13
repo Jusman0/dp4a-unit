@@ -11,7 +11,7 @@ d = c + a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]      a, b: four int8 packe
 | Check | Result |
 |---|---|
 | 10,000 random and edge-case vectors, all four signed/unsigned modes | **10,000 / 10,000 bit-exact**, combinational and pipelined |
-| TinyML layer 1: 5 test images × 32 neurons × 196 inputs | **160 / 160** int32 accumulators match NumPy and the Arduino |
+| TinyML layer 1: 5 test images × 32 neurons × 196 inputs | **160 / 160** int32 accumulators match NumPy (the Arduino sketch prints logits only) |
 | Max clock on an iCE40 HX8K FPGA, combinational `dp4a` between registers | ~51.6 MHz (median of 3 placement seeds; unlogged estimate, see [`synth/reports/`](synth/reports/)) |
 | Max clock, `dp4a_pipe` (two-stage) on its own | ~88.5 MHz (unlogged estimate), 1.7× faster for one extra clock of latency. `dot_engine` uses the combinational `dp4a`, so this doesn't apply to it |
 | iCE40 resources, `dp4a_pipe` | 1,043 LUT4s, 138 flip-flops, 93 carry cells (LUT count from an older Yosys; Yosys 0.69 gives 1,013 LUT4s) |
@@ -63,7 +63,7 @@ python3 model/golden.py # regenerate tests/*.hex
 python3 tools/plot_wave.py  # redraw docs/waveform.png from the last simulation
 ```
 
-A passing `make test` run (macOS, Icarus Verilog 12):
+A passing `make test` run (macOS, Icarus Verilog 13.0; make's command lines and Icarus's VCD and `$finish` messages left out):
 
 ```
 dp4a       (combinational): 10000/10000 match

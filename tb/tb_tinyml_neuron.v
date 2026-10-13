@@ -1,7 +1,8 @@
 // tb_tinyml_neuron: runs layer 1 of the TinyML MNIST network through
 // dot_engine. Every neuron is a 196-input int8 dot product, streamed in
-// as 49 dp4a beats. The int32 results must equal the accumulators the
-// network computes in NumPy and on the Arduino.
+// as 49 dp4a beats. The int32 results must equal the accumulators NumPy
+// computes for the network (the Arduino sketch only prints logits, so its
+// accumulators can't be compared directly).
 `timescale 1ns/1ps
 
 module tb_tinyml_neuron;
